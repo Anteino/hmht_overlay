@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>House Music Host Train</title>
+
+<style>
+*{box-sizing:border-box}
+
+html,body{
+  margin:0;
+  width:100%;
+  min-height:100%;
+  background:#000;
+}
+
+body{
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  overflow:auto;
+}
+
+.stage{
+  position:relative;
+  width:min(100vw,1920px);
+  aspect-ratio:16/9;
+  background:#000 url("assets/MHMT_overlay.png") center/100% 100% no-repeat;
+  overflow:hidden;
+}
+
+/*
+  Schedule positioning is set to the supplied reference values.
+*/
+.schedule{
+  position:absolute;
+  left:80.565%;
+  top:20.1%;
+  width:16.40%;
+  height:46.90%;
+
+  background:#000;
+  border:2px solid #8cff00;
+  border-radius:4px;
+
+  box-shadow:
+    0 0 5px #8cff00,
+    0 0 12px rgba(140,255,0,.72),
+    inset 0 0 8px rgba(140,255,0,.30);
+
+  overflow:hidden;
+}
+
+.schedule table{
+  width:100%;
+  height:100%;
+  border-collapse:collapse;
+  table-layout:fixed;
+}
+
+.schedule col.et,
+.schedule col.cet,
+.schedule col.aet{
+  width:21.5%;
+}
+
+.schedule col.dj{
+  width:35.5%;
+}
+
+.schedule th,
+.schedule td{
+  border:1px solid #8cff00;
+  padding:0 2px;
+  text-align:center;
+  vertical-align:middle;
+  white-space:nowrap;
+  overflow:hidden;
+  line-height:1;
+  font-weight:400;
+}
+
+/* Taller header row, as requested. */
+.schedule th{
+  height:50px;
+  color:#8cff00;
+  font-family:"Arial Narrow","Liberation Sans Narrow",Arial,sans-serif;
+  font-size:13px;
+  transform: scaleY(1.5);
+  font-weight:400;
+  text-shadow:0 0 3px rgba(140,255,0,.65);
+  overflow:visible;
+}
+
+.schedule th strong{
+  display:block;
+  font-family:"Arial Narrow","Liberation Sans Narrow",Arial,sans-serif;
+  font-size:1.12em;
+  line-height:1;
+  font-weight:400;
+}
+
+.schedule th small{
+  display:block;
+  margin-top:4px;
+  font-size:7px;
+  line-height:1.05;
+  font-weight:400;
+}
+
+/*
+  The actual cell text is fitted by JavaScript below.
+  It starts relatively large, then shrinks only as much as necessary
+  to fit horizontally. After fitting, scaleY makes the glyphs taller
+  without making them wider.
+*/
+.schedule td .cell-text{
+  display:inline-block;
+  white-space:nowrap;
+  transform-origin:center;
+  font-weight:400;
+}
+
+.schedule td.time{
+  color:#8cff00;
+  font-family:"Arial Narrow","Liberation Sans Narrow",Arial,sans-serif;
+  font-size:14px;
+  transform: scaleY(1.5);
+  font-weight:400;
+  text-shadow:0 0 3px rgba(140,255,0,.72);
+}
+
+.schedule td.dj{
+  color:#f3f3f3;
+  font-family:"Arial Narrow","Liberation Sans Narrow",Arial,sans-serif;
+  font-size:15px;
+  font-weight:400;
+  text-shadow:0 0 4px rgba(255,255,255,.42);
+  letter-spacing:0;
+}
+
+.kick-badge{
+  position:absolute;
+  left:80.565%;
+  top:67.00%;
+  width:16.40%;
+  height:auto;
+  display:block;
+  object-fit:contain;
+  filter:drop-shadow(0 0 3px rgba(140,255,0,.45));
+}
+</style>
+</head>
+
+<body>
+<div class="stage">
+
+  <section class="schedule" aria-label="House Music Host Train schedule">
+    <table>
+      <colgroup>
+        <col class="et">
+        <col class="cet">
+        <col class="aet">
+        <col class="dj">
+      </colgroup>
+
+      <thead>
+        <tr>
+          <th><strong>ET</strong><small>(EST/EDT)</small></th>
+          <th><strong>CET</strong><small>(CET/CEST)</small></th>
+          <th><strong>AET</strong><small>(AEST/AEDT)</small></th>
+          <th><strong>DJ / HOST</strong></th>
+        </tr>
+      </thead>
+
+      <tbody id="scheduleBody"></tbody>
+    </table>
+  </section>
+
+  <img
+    class="kick-badge"
+    src="assets/every-monday-kick.png"
+    alt="Every Monday on Kick"
+  >
+</div>
+
+<script>
+/*
+  Only ET and DJ/HOST are stored here.
+  CET/CEST and AET/AEDT are calculated automatically.
+*/
+const scheduleJSON = {
+  "date": "2026-08-24",
+  "timeZone": "America/New_York",
+  "entries": [
+    {"et":"8AM-10AM","artist":"DJSETSROCKA"},
+    {"et":"10AM-12PM","artist":"SEBASTIANHILGENFELDMUSIC"},
+    {"et":"12PM-2PM","artist":"DJ1ACKEE"},
+    {"et":"2PM-4PM","artist":"GIDDYGEESE"},
+    {"et":"4PM-6PM","artist":"DJTONGAKID"},
+    {"et":"6PM-8PM","artist":"KR1PT0NYT3"},
+    {"et":"8PM-10PM","artist":"INFINITISOUND"},
+    {"et":"10PM-12AM","artist":"DJRAMONV"},
+    {"et":"12AM-2AM","artist":"SICKMILLER"}
+  ]
+};
+
+function getParts(date,timeZone){
+  return Object.fromEntries(
+    new Intl.DateTimeFormat("en-US",{
+      timeZone,
+      year:"numeric",
+      month:"2-digit",
+      day:"2-digit",
+      hour:"2-digit",
+      minute:"2-digit",
+      hourCycle:"h23"
+    }).formatToParts(date).map(p=>[p.type,p.value])
+  );
+}
+
+function zonedDateTime(year,month,day,hour,minute,timeZone){
+  const target=Date.UTC(year,month-1,day,hour,minute,0,0);
+  let candidate=new Date(target);
+
+  for(let i=0;i<4;i++){
+    const p=getParts(candidate,timeZone);
+    const actual=Date.UTC(
+      Number(p.year),
+      Number(p.month)-1,
+      Number(p.day),
+      Number(p.hour),
+      Number(p.minute),
+      0,0
+    );
+
+    const correction=target-actual;
+    if(correction===0) break;
+    candidate=new Date(candidate.getTime()+correction);
+  }
+
+  return candidate;
+}
+
+function parseClock(value){
+  const m=value.trim().toUpperCase().match(
+    /^(\d{1,2})(?::(\d{2}))?(AM|PM)$/
+  );
+
+  if(!m) throw new Error("Invalid time: "+value);
+
+  let hour=Number(m[1]);
+  const minute=Number(m[2]||0);
+
+  if(m[3]==="AM"){
+    if(hour===12) hour=0;
+  }else if(hour!==12){
+    hour+=12;
+  }
+
+  return hour*60+minute;
+}
+
+function parseRange(value){
+  const [a,b]=value.split("-");
+  let start=parseClock(a);
+  let end=parseClock(b);
+
+  if(end<=start) end+=1440;
+
+  return {start,end};
+}
+
+function addDays(year,month,day,days){
+  const d=new Date(Date.UTC(year,month-1,day+days));
+
+  return {
+    year:d.getUTCFullYear(),
+    month:d.getUTCMonth()+1,
+    day:d.getUTCDate()
+  };
+}
+
+function formatClock(date,timeZone){
+  const p=getParts(date,timeZone);
+  let hour=Number(p.hour);
+  const suffix=hour>=12?"PM":"AM";
+
+  hour=hour%12||12;
+
+  return hour+suffix;
+}
+
+function convertRange(etRange,dateString,fromZone,toZone){
+  const [year,month,day]=dateString.split("-").map(Number);
+  const {start,end}=parseRange(etRange);
+
+  const startDate=zonedDateTime(
+    year,month,day,
+    Math.floor(start/60),start%60,
+    fromZone
+  );
+
+  const endDay=Math.floor(end/1440);
+  const endMinute=end%1440;
+  const ep=addDays(year,month,day,endDay);
+
+  const endDate=zonedDateTime(
+    ep.year,ep.month,ep.day,
+    Math.floor(endMinute/60),endMinute%60,
+    fromZone
+  );
+
+  return formatClock(startDate,toZone)+"-"+formatClock(endDate,toZone);
+}
+
+
+function fitCellText(){
+  const cells=document.querySelectorAll(".schedule td");
+
+  cells.forEach(cell=>{
+    const text=cell.querySelector(".cell-text");
+    if(!text) return;
+
+    // Start large, then reduce only until the complete string fits.
+    let size = cell.classList.contains("dj") ? 15 : 14;
+    const minimum = cell.classList.contains("dj") ? 8 : 7;
+    const available = Math.max(4, cell.clientWidth - 5);
+
+    text.style.fontSize = size + "px";
+    text.style.transform = "scaleY(1.22)";
+
+    while(text.scrollWidth > available && size > minimum){
+      size -= 0.25;
+      text.style.fontSize = size + "px";
+    }
+
+    /*
+      Make the fitted text visually taller. This increases the vertical
+      character presence without causing horizontal overflow.
+    */
+    text.style.transform = "scaleY(1.24)";
+  });
+}
+
+const tbody=document.getElementById("scheduleBody");
+
+for(const item of scheduleJSON.entries){
+  const row=document.createElement("tr");
+
+  const cells=[
+    [item.et,"time"],
+    [
+      convertRange(
+        item.et,
+        scheduleJSON.date,
+        scheduleJSON.timeZone,
+        "Europe/Berlin"
+      ),
+      "time"
+    ],
+    [
+      convertRange(
+        item.et,
+        scheduleJSON.date,
+        scheduleJSON.timeZone,
+        "Australia/Sydney"
+      ),
+      "time"
+    ],
+    [item.artist,"dj"]
+  ];
+
+  for(const [value,className] of cells){
+    const cell=document.createElement("td");
+    cell.className=className;
+
+    const text=document.createElement("span");
+    text.className="cell-text";
+    text.textContent=value;
+    cell.appendChild(text);
+
+    row.appendChild(cell);
+  }
+
+  tbody.appendChild(row);
+}
+</script>
+</body>
+</html>
+
+<script>
+function refitSchedule(){
+  requestAnimationFrame(fitCellText);
+}
+window.addEventListener("load", refitSchedule);
+window.addEventListener("resize", refitSchedule);
+</script>
