@@ -167,7 +167,7 @@ body{
         <tr>
           <th><strong>ET</strong></th>
           <th><strong>CET</strong></th>
-          <th><strong>DJ / HOST</strong></th>
+          <th><strong>HOST</strong></th>
         </tr>
       </thead>
 
@@ -327,7 +327,7 @@ function fitCellText(){
 
     while(text.scrollWidth > available && size > minimum){
       size -= 0.25;
-      text.style.fontSize = size + "px";
+      text.style.fontSize = size - 2 + "px";
     }
 
     /*
