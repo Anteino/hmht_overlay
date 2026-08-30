@@ -185,7 +185,7 @@ body{
 <script>
 /*
   Only ET and DJ/HOST are stored here.
-  CET/CEST and AET/AEDT are calculated automatically.
+  CET/CEST is calculated automatically.
 */
 const scheduleJSON = {
   "date": "2026-08-24",
@@ -351,15 +351,6 @@ for(const item of scheduleJSON.entries){
         scheduleJSON.date,
         scheduleJSON.timeZone,
         "Europe/Berlin"
-      ),
-      "time"
-    ],
-    [
-      convertRange(
-        item.et,
-        scheduleJSON.date,
-        scheduleJSON.timeZone,
-        "Australia/Sydney"
       ),
       "time"
     ],
