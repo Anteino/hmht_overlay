@@ -294,7 +294,7 @@ function fitCellText(){
     const minimum = cell.classList.contains("dj") ? 8 : 7;
     const available = Math.max(4, cell.clientWidth - 5);
 
-    text.style.fontSize = size + "px";
+    text.style.fontSize = size / 2 + "px";
     text.style.transform = "scaleY(1.22)";
 
     while(text.scrollWidth > available && size > minimum){
