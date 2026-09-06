@@ -61,11 +61,11 @@ body{
 
 .schedule col.et,
 .schedule col.cet{
-  width:32.25%;
+  width:25%;
 }
 
 .schedule col.dj{
-  width:35.5%;
+  width:50%;
 }
 
 .schedule th,
@@ -184,19 +184,21 @@ body{
 
 <script>
 /*
-  Only ET and DJ/HOST are stored here.
+  Only the ET start time and DJ/HOST are stored here.
   CET/CEST is calculated automatically.
 */
 const scheduleJSON = {
   "date": "2026-08-24",
   "timeZone": "America/New_York",
   "entries": [
-    {"et":"12PM-2PM","artist":"STEFFIENOVA"},
-    {"et":"2PM-4PM","artist":"GIDDYGEESE"},
-    {"et":"4PM-6PM","artist":"DJPREZGRANT"},
-    {"et":"6PM-8PM","artist":"INFINITISOUND"},
-    {"et":"8PM-10PM","artist":"DJBABYDEE"},
-    {"et":"10PM-12AM","artist":"SICKMILLER"}
+    {"et":"8AM","artist":"BLUVIZIONTV"},
+    {"et":"10AM","artist":"SEBASTIANHILGENFELD"},
+    {"et":"12PM","artist":"KINGZ AND QUEENZ ENT"},
+    {"et":"2PM","artist":"GIDDYGEESE"},
+    {"et":"4PM","artist":"THE_AMBASSADOR1007"},
+    {"et":"6PM","artist":"DJTONGAKID"},
+    {"et":"8PM","artist":"DJ1ACKEE"},
+    {"et":"10PM","artist":"SICKMILLER"}
   ]
 };
 
@@ -256,26 +258,6 @@ function parseClock(value){
   return hour*60+minute;
 }
 
-function parseRange(value){
-  const [a,b]=value.split("-");
-  let start=parseClock(a);
-  let end=parseClock(b);
-
-  if(end<=start) end+=1440;
-
-  return {start,end};
-}
-
-function addDays(year,month,day,days){
-  const d=new Date(Date.UTC(year,month-1,day+days));
-
-  return {
-    year:d.getUTCFullYear(),
-    month:d.getUTCMonth()+1,
-    day:d.getUTCDate()
-  };
-}
-
 function formatClock(date,timeZone){
   const p=getParts(date,timeZone);
   let hour=Number(p.hour);
@@ -286,27 +268,17 @@ function formatClock(date,timeZone){
   return hour+suffix;
 }
 
-function convertRange(etRange,dateString,fromZone,toZone){
+function convertTime(etTime,dateString,fromZone,toZone){
   const [year,month,day]=dateString.split("-").map(Number);
-  const {start,end}=parseRange(etRange);
+  const minutes=parseClock(etTime);
 
-  const startDate=zonedDateTime(
+  const date=zonedDateTime(
     year,month,day,
-    Math.floor(start/60),start%60,
+    Math.floor(minutes/60),minutes%60,
     fromZone
   );
 
-  const endDay=Math.floor(end/1440);
-  const endMinute=end%1440;
-  const ep=addDays(year,month,day,endDay);
-
-  const endDate=zonedDateTime(
-    ep.year,ep.month,ep.day,
-    Math.floor(endMinute/60),endMinute%60,
-    fromZone
-  );
-
-  return formatClock(startDate,toZone)+"-"+formatClock(endDate,toZone);
+  return formatClock(date,toZone);
 }
 
 
@@ -346,7 +318,7 @@ for(const item of scheduleJSON.entries){
   const cells=[
     [item.et,"time"],
     [
-      convertRange(
+      convertTime(
         item.et,
         scheduleJSON.date,
         scheduleJSON.timeZone,
