@@ -6,41 +6,68 @@
 <title>House Music Host Train</title>
 
 <style>
-*{box-sizing:border-box}
-
-html,body{
-  margin:0;
-  width:100%;
-  min-height:100%;
-  background:transparent;
+*{
+  box-sizing:border-box;
 }
 
+html,
 body{
-  display:flex;
-  justify-content:center;
-  align-items:flex-start;
-  overflow:auto;
-}
+  position:fixed;
+  left:0;
+  top:0;
+  right:0;
+  bottom:0;
 
-.stage{
-  position:relative;
-  width:min(100vw,1920px);
-  aspect-ratio:16/9;
-  background:transparent url("assets/MHMT_overlay.png") center/100% 100% no-repeat;
+  margin:0;
+  padding:0;
+
+  width:100%;
+  height:100%;
+
+  background:transparent;
   overflow:hidden;
 }
 
 /*
-  Schedule positioning is set to the supplied reference values.
+  Fixed 1920x1080 design canvas.
+  OBS/browser scaling is applied to the entire stage with JavaScript.
 */
+.stage{
+  position:absolute;
+
+  left:0;
+  top:0;
+
+  width:1920px;
+  height:1080px;
+
+  transform-origin:0 0;
+
+  background:
+    transparent
+    url("assets/MHMT_overlay.png")
+    center/100% 100%
+    no-repeat;
+
+  overflow:hidden;
+}
+
+
+/* =========================================================
+   SCHEDULE
+   ========================================================= */
+
 .schedule{
   position:absolute;
+
   left:80.565%;
   top:20.1%;
+
   width:16.40%;
   height:46.90%;
 
   background:#000;
+
   border:2px solid #8cff00;
   border-radius:4px;
 
@@ -55,6 +82,7 @@ body{
 .schedule table{
   width:100%;
   height:100%;
+
   border-collapse:collapse;
   table-layout:fixed;
 }
@@ -71,92 +99,183 @@ body{
 .schedule th,
 .schedule td{
   border:1px solid #8cff00;
+
   padding:0 2px;
+
   text-align:center;
   vertical-align:middle;
+
   white-space:nowrap;
   overflow:hidden;
+
   line-height:1;
   font-weight:400;
 }
 
-/* Taller header row, as requested. */
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
 .schedule th{
   height:50px;
+
   color:#8cff00;
-  font-family:"Arial Narrow","Liberation Sans Narrow",Arial,sans-serif;
-  font-size:13px;
-  transform: scaleY(1.5);
+
+  font-family:
+    "Arial Narrow",
+    "Liberation Sans Narrow",
+    Arial,
+    sans-serif;
+
+  /*
+    Increased from 13px.
+  */
+  font-size:17px;
+
+  transform:scaleY(1.5);
+
   font-weight:400;
-  text-shadow:0 0 3px rgba(140,255,0,.65);
+
+  text-shadow:
+    0 0 3px rgba(140,255,0,.65);
+
   overflow:visible;
 }
 
 .schedule th strong{
   display:block;
-  font-family:"Arial Narrow","Liberation Sans Narrow",Arial,sans-serif;
+
+  font-family:
+    "Arial Narrow",
+    "Liberation Sans Narrow",
+    Arial,
+    sans-serif;
+
   font-size:1.12em;
   line-height:1;
+
   font-weight:400;
 }
 
 .schedule th small{
   display:block;
+
   margin-top:4px;
-  font-size:7px;
+
+  font-size:8px;
   line-height:1.05;
+
   font-weight:400;
 }
 
-/*
-  The actual cell text is fitted by JavaScript below.
-  It starts relatively large, then shrinks only as much as necessary
-  to fit horizontally. After fitting, scaleY makes the glyphs taller
-  without making them wider.
-*/
+
+/* =========================================================
+   CELL TEXT
+   ========================================================= */
+
 .schedule td .cell-text{
   display:inline-block;
+
   white-space:nowrap;
+
   transform-origin:center;
+
   font-weight:400;
 }
+
+
+/* =========================================================
+   TIME COLUMNS
+   ========================================================= */
 
 .schedule td.time{
   color:#8cff00;
-  font-family:"Arial Narrow","Liberation Sans Narrow",Arial,sans-serif;
-  font-size:14px;
-  transform: scaleY(1.5);
+
+  font-family:
+    "Arial Narrow",
+    "Liberation Sans Narrow",
+    Arial,
+    sans-serif;
+
+  /*
+    Increased from 14px to 19px.
+  */
+  font-size:19px;
+
+  transform:scaleY(1.5);
+
   font-weight:400;
-  text-shadow:0 0 3px rgba(140,255,0,.72);
+
+  text-shadow:
+    0 0 3px rgba(140,255,0,.72);
 }
+
+
+/* =========================================================
+   DJ / HOST COLUMN
+   ========================================================= */
 
 .schedule td.dj{
   color:#f3f3f3;
-  font-family:"Arial Narrow","Liberation Sans Narrow",Arial,sans-serif;
-  font-size:15px;
+
+  font-family:
+    "Arial Narrow",
+    "Liberation Sans Narrow",
+    Arial,
+    sans-serif;
+
+  /*
+    Increased from 15px to 20px.
+    JavaScript will shrink this only when necessary.
+  */
+  font-size:20px;
+
   font-weight:400;
-  text-shadow:0 0 4px rgba(255,255,255,.42);
+
+  text-shadow:
+    0 0 4px rgba(255,255,255,.42);
+
   letter-spacing:0;
 }
 
+
+/* =========================================================
+   KICK BADGE
+   ========================================================= */
+
 .kick-badge{
   position:absolute;
+
   left:80.565%;
   top:67.00%;
+
   width:16.40%;
   height:auto;
+
   display:block;
+
   object-fit:contain;
-  filter:drop-shadow(0 0 3px rgba(140,255,0,.45));
+
+  filter:
+    drop-shadow(
+      0 0 3px rgba(140,255,0,.45)
+    );
 }
 </style>
 </head>
 
-<body>
-<div class="stage">
 
-  <section class="schedule" aria-label="House Music Host Train schedule">
+<body>
+
+<div class="stage" id="overlayStage">
+
+  <section
+    class="schedule"
+    aria-label="House Music Host Train schedule"
+  >
     <table>
+
       <colgroup>
         <col class="et">
         <col class="cet">
@@ -165,189 +284,575 @@ body{
 
       <thead>
         <tr>
-          <th><strong>ET</strong></th>
-          <th><strong>CET</strong></th>
-          <th><strong>HOST</strong></th>
+          <th>
+            <strong>ET</strong>
+          </th>
+
+          <th>
+            <strong>CET</strong>
+          </th>
+
+          <th>
+            <strong>HOST</strong>
+          </th>
         </tr>
       </thead>
 
       <tbody id="scheduleBody"></tbody>
+
     </table>
   </section>
+
 
   <img
     class="kick-badge"
     src="assets/every-monday-kick.png"
     alt="Every Monday on Kick"
   >
+
 </div>
 
+
 <script>
-/*
-  Only the ET start time and DJ/HOST are stored here.
-  CET/CEST is calculated automatically.
-*/
+/* =========================================================
+   OBS / BROWSER SCALING
+   ========================================================= */
+
+const DESIGN_WIDTH = 1920;
+const DESIGN_HEIGHT = 1080;
+
+const overlayStage = document.getElementById("overlayStage");
+
+function updateStageScale(){
+
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+
+  const scaleX =
+    viewportWidth / DESIGN_WIDTH;
+
+  const scaleY =
+    viewportHeight / DESIGN_HEIGHT;
+
+  /*
+    Use the smaller scale so the complete 1920x1080
+    design remains visible.
+  */
+  const scale =
+    Math.min(scaleX, scaleY);
+
+  overlayStage.style.transform =
+    `scale(${scale})`;
+
+  overlayStage.style.left = "0px";
+  overlayStage.style.top = "0px";
+}
+
+
+/* =========================================================
+   SCHEDULE DATA
+   ========================================================= */
+
 const scheduleJSON = {
   "date": "2026-08-24",
+
   "timeZone": "America/New_York",
+
   "entries": [
-    {"et":"2PM","artist":"GIDDYGEESE"},
-    {"et":"4PM","artist":"DJBABYDEE"},
-    {"et":"6PM","artist":"DJPREZGRANT"},
-    {"et":"8PM","artist":"DJ1ACKEE"},
-    {"et":"10PM","artist":"SICKMILLER"}
+    {
+      "et":"2PM",
+      "artist":"GIDDYGEESE"
+    },
+    {
+      "et":"4PM",
+      "artist":"DJBABYDEE"
+    },
+    {
+      "et":"6PM",
+      "artist":"DJPREZGRANT"
+    },
+    {
+      "et":"8PM",
+      "artist":"DJ1ACKEE"
+    },
+    {
+      "et":"10PM",
+      "artist":"SICKMILLER"
+    }
   ]
 };
 
+
+/* =========================================================
+   TIMEZONE FUNCTIONS
+   ========================================================= */
+
 function getParts(date,timeZone){
+
   return Object.fromEntries(
-    new Intl.DateTimeFormat("en-US",{
-      timeZone,
-      year:"numeric",
-      month:"2-digit",
-      day:"2-digit",
-      hour:"2-digit",
-      minute:"2-digit",
-      hourCycle:"h23"
-    }).formatToParts(date).map(p=>[p.type,p.value])
+    new Intl.DateTimeFormat(
+      "en-US",
+      {
+        timeZone,
+
+        year:"numeric",
+        month:"2-digit",
+        day:"2-digit",
+
+        hour:"2-digit",
+        minute:"2-digit",
+
+        hourCycle:"h23"
+      }
+    )
+    .formatToParts(date)
+    .map(p => [p.type,p.value])
   );
 }
 
-function zonedDateTime(year,month,day,hour,minute,timeZone){
-  const target=Date.UTC(year,month-1,day,hour,minute,0,0);
-  let candidate=new Date(target);
 
-  for(let i=0;i<4;i++){
-    const p=getParts(candidate,timeZone);
-    const actual=Date.UTC(
-      Number(p.year),
-      Number(p.month)-1,
-      Number(p.day),
-      Number(p.hour),
-      Number(p.minute),
-      0,0
+function zonedDateTime(
+  year,
+  month,
+  day,
+  hour,
+  minute,
+  timeZone
+){
+
+  const target =
+    Date.UTC(
+      year,
+      month - 1,
+      day,
+      hour,
+      minute,
+      0,
+      0
     );
 
-    const correction=target-actual;
-    if(correction===0) break;
-    candidate=new Date(candidate.getTime()+correction);
+  let candidate =
+    new Date(target);
+
+
+  for(let i = 0; i < 4; i++){
+
+    const p =
+      getParts(
+        candidate,
+        timeZone
+      );
+
+    const actual =
+      Date.UTC(
+        Number(p.year),
+        Number(p.month) - 1,
+        Number(p.day),
+        Number(p.hour),
+        Number(p.minute),
+        0,
+        0
+      );
+
+    const correction =
+      target - actual;
+
+    if(correction === 0)
+      break;
+
+    candidate =
+      new Date(
+        candidate.getTime() +
+        correction
+      );
   }
 
   return candidate;
 }
 
+
 function parseClock(value){
-  const m=value.trim().toUpperCase().match(
-    /^(\d{1,2})(?::(\d{2}))?(AM|PM)$/
-  );
 
-  if(!m) throw new Error("Invalid time: "+value);
+  const m =
+    value
+      .trim()
+      .toUpperCase()
+      .match(
+        /^(\d{1,2})(?::(\d{2}))?(AM|PM)$/
+      );
 
-  let hour=Number(m[1]);
-  const minute=Number(m[2]||0);
+  if(!m)
+    throw new Error(
+      "Invalid time: " + value
+    );
 
-  if(m[3]==="AM"){
-    if(hour===12) hour=0;
-  }else if(hour!==12){
-    hour+=12;
+  let hour =
+    Number(m[1]);
+
+  const minute =
+    Number(m[2] || 0);
+
+
+  if(m[3] === "AM"){
+
+    if(hour === 12)
+      hour = 0;
+
+  }else{
+
+    if(hour !== 12)
+      hour += 12;
   }
 
-  return hour*60+minute;
+
+  return hour * 60 + minute;
 }
 
-function formatClock(date,timeZone){
-  const p=getParts(date,timeZone);
-  let hour=Number(p.hour);
-  const suffix=hour>=12?"PM":"AM";
 
-  hour=hour%12||12;
+function formatClock(
+  date,
+  timeZone
+){
 
-  return hour+suffix;
+  const p =
+    getParts(
+      date,
+      timeZone
+    );
+
+  let hour =
+    Number(p.hour);
+
+  const suffix =
+    hour >= 12
+      ? "PM"
+      : "AM";
+
+  hour =
+    hour % 12 || 12;
+
+  return hour + suffix;
 }
 
-function convertTime(etTime,dateString,fromZone,toZone){
-  const [year,month,day]=dateString.split("-").map(Number);
-  const minutes=parseClock(etTime);
 
-  const date=zonedDateTime(
-    year,month,day,
-    Math.floor(minutes/60),minutes%60,
-    fromZone
+function convertTime(
+  etTime,
+  dateString,
+  fromZone,
+  toZone
+){
+
+  const [
+    year,
+    month,
+    day
+  ] =
+    dateString
+      .split("-")
+      .map(Number);
+
+  const minutes =
+    parseClock(etTime);
+
+
+  const date =
+    zonedDateTime(
+      year,
+      month,
+      day,
+
+      Math.floor(
+        minutes / 60
+      ),
+
+      minutes % 60,
+
+      fromZone
+    );
+
+
+  return formatClock(
+    date,
+    toZone
   );
-
-  return formatClock(date,toZone);
 }
 
+
+/* =========================================================
+   FIT HOST NAMES
+   ========================================================= */
 
 function fitCellText(){
-  const cells=document.querySelectorAll(".schedule td");
 
-  cells.forEach(cell=>{
-    const text=cell.querySelector(".cell-text");
-    if(!text) return;
+  const cells =
+    document.querySelectorAll(
+      ".schedule td"
+    );
 
-    // Start large, then reduce only until the complete string fits.
-    let size = cell.classList.contains("dj") ? 15 : 14;
-    const minimum = cell.classList.contains("dj") ? 8 : 7;
-    const available = Math.max(4, cell.clientWidth - 5);
 
-    text.style.fontSize = size / 2 + "px";
-    text.style.transform = "scaleY(1.22)";
+  cells.forEach(cell => {
 
-    while(text.scrollWidth > available && size > minimum){
-      size -= 0.25;
-      text.style.fontSize = size - 2 + "px";
-    }
+    const text =
+      cell.querySelector(
+        ".cell-text"
+      );
+
+    if(!text)
+      return;
+
+
+    const isDJ =
+      cell.classList.contains(
+        "dj"
+      );
+
 
     /*
-      Make the fitted text visually taller. This increases the vertical
-      character presence without causing horizontal overflow.
+      Larger starting sizes.
+      
+      DJ names:
+        20px → down to 8px
+
+      Times:
+        19px → down to 7px
     */
-    text.style.transform = "scaleY(1.24)";
+    let size =
+      isDJ ? 20 : 19;
+
+    const minimum =
+      isDJ ? 8 : 7;
+
+
+    /*
+      Horizontal space available
+      inside the cell.
+    */
+    const available =
+      Math.max(
+        4,
+        cell.clientWidth - 5
+      );
+
+
+    /*
+      Start at the full intended
+      design-size font.
+    */
+    text.style.fontSize =
+      size + "px";
+
+
+    /*
+      Make the text vertically taller
+      without increasing its width.
+    */
+    text.style.transform =
+      "scaleY(1.24)";
+
+
+    /*
+      Shrink only when the actual
+      rendered text is too wide.
+    */
+    while(
+      text.scrollWidth > available &&
+      size > minimum
+    ){
+
+      size -= 0.25;
+
+      text.style.fontSize =
+        size + "px";
+    }
+
+
+    /*
+      Final vertical stretch.
+      This does not affect horizontal
+      fitting because scaleX remains 1.
+    */
+    text.style.transform =
+      "scaleY(1.24)";
   });
 }
 
-const tbody=document.getElementById("scheduleBody");
 
-for(const item of scheduleJSON.entries){
-  const row=document.createElement("tr");
+/* =========================================================
+   BUILD SCHEDULE
+   ========================================================= */
 
-  const cells=[
-    [item.et,"time"],
+const tbody =
+  document.getElementById(
+    "scheduleBody"
+  );
+
+
+for(
+  const item of scheduleJSON.entries
+){
+
+  const row =
+    document.createElement(
+      "tr"
+    );
+
+
+  const cells = [
+
+    [
+      item.et,
+      "time"
+    ],
+
     [
       convertTime(
         item.et,
+
         scheduleJSON.date,
+
         scheduleJSON.timeZone,
+
         "Europe/Berlin"
       ),
+
       "time"
     ],
-    [item.artist,"dj"]
+
+    [
+      item.artist,
+      "dj"
+    ]
+
   ];
 
-  for(const [value,className] of cells){
-    const cell=document.createElement("td");
-    cell.className=className;
 
-    const text=document.createElement("span");
-    text.className="cell-text";
-    text.textContent=value;
-    cell.appendChild(text);
+  for(
+    const [
+      value,
+      className
+    ]
+    of cells
+  ){
 
-    row.appendChild(cell);
+    const cell =
+      document.createElement(
+        "td"
+      );
+
+    cell.className =
+      className;
+
+
+    const text =
+      document.createElement(
+        "span"
+      );
+
+    text.className =
+      "cell-text";
+
+    text.textContent =
+      value;
+
+
+    cell.appendChild(
+      text
+    );
+
+    row.appendChild(
+      cell
+    );
   }
 
-  tbody.appendChild(row);
+
+  tbody.appendChild(
+    row
+  );
 }
+
+
+/* =========================================================
+   REFIT + RESIZE
+   ========================================================= */
+
+function refitSchedule(){
+
+  requestAnimationFrame(() => {
+
+    fitCellText();
+
+  });
+}
+
+
+/*
+  Initial scaling.
+*/
+updateStageScale();
+
+
+/*
+  Initial text fitting.
+*/
+window.addEventListener(
+  "load",
+  () => {
+
+    updateStageScale();
+    refitSchedule();
+
+  }
+);
+
+
+/*
+  Normal browser / OBS viewport resize.
+*/
+window.addEventListener(
+  "resize",
+  () => {
+
+    updateStageScale();
+    refitSchedule();
+
+  }
+);
+
+
+/*
+  OBS Chromium can expose viewport
+  changes through visualViewport.
+*/
+if(window.visualViewport){
+
+  window.visualViewport.addEventListener(
+    "resize",
+    () => {
+
+      updateStageScale();
+      refitSchedule();
+
+    }
+  );
+
+}
+
+
+/*
+  Extra refit after fonts/layout have
+  settled.
+*/
+setTimeout(
+  refitSchedule,
+  100
+);
+
+setTimeout(
+  refitSchedule,
+  500
+);
+
 </script>
+
 </body>
 </html>
-
-<script>
-function refitSchedule(){
-  requestAnimationFrame(fitCellText);
-}
-window.addEventListener("load", refitSchedule);
-window.addEventListener("resize", refitSchedule);
-</script>
